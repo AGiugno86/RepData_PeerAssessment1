@@ -10,7 +10,7 @@ First off, we need to load the libraries, which we will need to use throughout t
 
 ```r
 library(knitr)
-library(dplyr)
+library(lattice)
 
 if (!dir.exists("figures/")) {dir.create("figures/")}
 ```
@@ -144,3 +144,31 @@ The new mean and median are:
 They are increased and they coincide now.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+First off, we have to create a factor variable with two levels: "Weekday" and "Weekend".
+
+```r
+Sys.setlocale("LC_TIME", "C")   #To have day names in english
+```
+
+```
+## [1] "C"
+```
+
+```r
+is_weekday <- factor(weekdays(activityDf$date) %in% c("Saturday", "Sunday"),
+                     labels = c("Weekday", "Weekend"))
+```
+Now, we aggregate this new field, plus the intervals, to the number of steps calling the ```mean()``` function. In this way we get the average number of steps per interval and type of day. Finally, we create the desired plot.
+
+```r
+to_plot <- aggregate(activityDf$steps ~ activityDf$interval + is_weekday,
+                     activityDf, mean)
+names(to_plot) <- c("interval", "is_weekday", "steps")
+
+xyplot(steps ~ interval | is_weekday, 
+       to_plot, type = "l", col = "red", layout = c(1,2),
+       main = "Average number of steps per interval: Weekdays vs Weekends")
+```
+
+![](figures/unnamed-chunk-15-1.png)<!-- -->
